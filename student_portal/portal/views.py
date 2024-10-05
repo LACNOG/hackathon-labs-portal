@@ -11,31 +11,24 @@ from django.views.decorators.cache import never_cache
 from django.contrib import messages
 
 from django.views.decorators.debug import sensitive_post_parameters
+from django.http import HttpResponseRedirect
+
+from allauth.account.views import LoginView # type: ignore
+from django.urls import reverse_lazy
+
+class CustomLoginView(LoginView):
+    template_name = 'account/login2.html'
+    # success_url = reverse_lazy('student_dashboard')  # or whatever your dashboard URL name is
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['page_title'] = 'Log In'  # Add any additional context you need
+    #     return context
 
 
 class CustomConfirmEmailView(ConfirmEmailView):
-    template_name = 'account/email_confirmation.html'
-
-    def get_object(self, *args, **kwargs):
-        key = kwargs.get('key')
-        emailconfirmation = EmailConfirmationHMAC.from_key(key)
-        if not emailconfirmation:
-            if EmailConfirmation.objects.all_valid().filter(key=key).exists():
-                emailconfirmation = EmailConfirmation.objects.all_valid().get(key=key)
-                emailconfirmation.confirm(self.request)
-            else:
-                emailconfirmation = None
-        return emailconfirmation
-
-    def get(self, *args, **kwargs):
-        self.object = self.get_object(**kwargs)
-        context = self.get_context_data()
-        return self.render_to_response(context)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['confirmation'] = self.object
-        return context
+     # template_name = 'account/email_confirmation.html'
+     template_name = 'account/email_confirmation.html'
 
 
 class StudentSignupView(SignupView):
@@ -56,10 +49,20 @@ def landing_page(request):
 
 class CustomEmailVerificationSentView(EmailVerificationSentView):
     def get(self, request, *args, **kwargs):
+        # Clear any existing messages
+        storage = messages.get_messages(request)
+        for message in storage:
+            # This iteration is necessary to mark the messages as processed
+            pass
+        storage.used = True
+
+        # Add only the email sent confirmation message
+        messages.success(request, f"Confirmation email sent to {request.user.email}.")
+        
         return render(request, 'account/email_verification_sent_initial.html', {'messages': messages.get_messages(request)})
-    
-class CustomConfirmEmailView(ConfirmEmailView):
-    template_name = 'account/email_confirmation.html'
+
+
 
 class EmailVerificationInstructionsView(TemplateView):
     template_name = 'account/email_verification_instructions.html'
+
