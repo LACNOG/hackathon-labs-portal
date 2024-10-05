@@ -13,8 +13,17 @@ from django.contrib import messages
 from django.views.decorators.debug import sensitive_post_parameters
 from django.http import HttpResponseRedirect
 
-from allauth.account.views import LoginView # type: ignore
+from allauth.account.views import LoginView, LogoutView # type: ignore
 from django.urls import reverse_lazy
+
+class CustomLogoutView(LogoutView):
+    template_name = 'account/logout2.html'  # Use logout2.html instead of logout.html
+    success_url = reverse_lazy('landing_page')  # or whatever your home page URL name is
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['page_title'] = 'Log Out'
+        return context
 
 class CustomLoginView(LoginView):
     template_name = 'account/login2.html'

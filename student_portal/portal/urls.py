@@ -1,7 +1,7 @@
 from django.urls import path, re_path, include
 # from .views import CustomConfirmEmailView, CustomEmailVerificationSentView
 from . import views
-from .views import CustomLoginView, CustomConfirmEmailView, student_dashboard, landing_page, student_signup
+from .views import CustomLoginView, CustomLogoutView, CustomConfirmEmailView, student_dashboard, landing_page, student_signup
 
 
 
@@ -11,6 +11,7 @@ urlpatterns = [
     path('dashboard/', views.student_dashboard, name='student_dashboard'),
     
     path('accounts/login/', CustomLoginView.as_view(), name='account_login'),
+    path('accounts/logout/', CustomLogoutView.as_view(), name='account_logout'),
     path('accounts/email-verification-instructions/', views.EmailVerificationInstructionsView.as_view(), name='email_verification_instructions'),
 
     path('accounts/confirm-email/', views.EmailVerificationInstructionsView.as_view(), name='email_verification_instructions'),
