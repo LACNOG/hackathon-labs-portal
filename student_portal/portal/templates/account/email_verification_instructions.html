@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Email Verification Instructions" %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "Email Verification Instructions" %}</h1>
+
+    <p>{% blocktrans %}We have sent an e-mail to you for verification. Follow the link provided to finalize the signup process. If you do not see the verification e-mail in your main inbox, check your spam folder. Please contact us if you do not receive the verification e-mail within a few minutes.{% endblocktrans %}</p>
+
+    <h2>{% trans "Menu" %}</h2>
+    <ul>
+        <li><a href="{% url 'account_login' %}">{% trans "Sign In" %}</a></li>
+        <li><a href="{% url 'account_signup' %}">{% trans "Sign Up" %}</a></li>
+    </ul>
+{% endblock %}

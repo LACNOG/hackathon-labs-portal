@@ -31,6 +31,7 @@ SECRET_KEY = 'django-insecure-vx3q%qmsp_i#ht-qu#ve9fk_^$c*%#01runlb9uzj_jfp^8z9^
 DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
+INTERNAL_IPS = ['127.0.0.1', ]
 
 
 # Application definition
@@ -77,14 +78,25 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth settings
+ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 86400 
 LOGIN_REDIRECT_URL = '/dashboard/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Add these lines
+ACCOUNT_TEMPLATE_EXTENSION = 'html'
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/accounts/email-verification-instructions/'
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/accounts/email-verification-instructions/'
+
+
+# Explicitly set the template for email verification sent page
+ACCOUNT_EMAIL_VERIFICATION_SENT_TEMPLATE = 'account/email_verification_sent.html'
 
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
@@ -111,8 +123,10 @@ ROOT_URLCONF = 'student_portal.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Add this line
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+            os.path.join(BASE_DIR, 'templates', 'account'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,9 +138,8 @@ TEMPLATES = [
         },
     },
 ]
-
 WSGI_APPLICATION = 'student_portal.wsgi.application'
-
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

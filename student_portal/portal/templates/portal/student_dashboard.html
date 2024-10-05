@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}Student Dashboard{% endblock %}
+
 {% block content %}
-<h2>Welcome, {{ user.first_name }}!</h2>
+<h1>Welcome, {{ user.first_name }}!</h1>
 <p>Your student ID: {{ user.studentprofile.student_id }}</p>
 <p>Your workshop: {{ user.studentprofile.workshop.name }}</p>
 <p>Your lab equipment: {{ user.studentprofile.lab_equipment.name }}</p>

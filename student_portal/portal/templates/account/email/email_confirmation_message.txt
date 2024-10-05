@@ -1,0 +1,7 @@
+Hello from Student Portal!
+
+You're receiving this e-mail because user {{ user_display }} has given this address as their email for their account.
+
+To confirm this is correct, go to {{ activate_url }}
+
+Thank you from Student Portal!
