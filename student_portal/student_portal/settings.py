@@ -43,18 +43,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'portal'
-]
-
-INSTALLED_APPS += [
     'django.contrib.sites',
     'allauth',
     'allauth.account',
-    # 'allauth.socialaccount',
-    # # Add the providers you want to enable:
-    # 'allauth.socialaccount.providers.google',
-    # 'allauth.socialaccount.providers.github',
+    'django_extensions',
+    'portal'
 ]
+
 
 SITE_ID = 1
 
@@ -66,37 +61,32 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
-
-MIDDLEWARE += [
     'allauth.account.middleware.AccountMiddleware',
 ]
+
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Allauth settings
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 86400 
 LOGIN_REDIRECT_URL = '/dashboard/'
+ACCOUNT_SIGNUP_REDIRECT_URL = '/accounts/confirm-email'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# Add these lines
 ACCOUNT_TEMPLATE_EXTENSION = 'html'
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = '/accounts/email-verification-instructions/'
-ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = '/accounts/email-verification-instructions/'
+# ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'accounts/email-verification-instructions/'
+# ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = 'accounts/email-verification-instructions/'
 
-
-# Explicitly set the template for email verification sent page
-ACCOUNT_EMAIL_VERIFICATION_SENT_TEMPLATE = 'account/email_verification_sent.html'
+# Check if this setting is present and what value it has
+# ACCOUNT_EMAIL_VERIFICATION_SENT_TEMPLATE = 'account/email_verification_sent.html'
 
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
