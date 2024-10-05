@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Email Verification Sent" %}{% endblock %}
+
+{% block content %}
+    <h1>{% trans "Email Verification Sent" %}</h1>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <p>{% trans "Please check your email for the verification link." %}</p>
+    
+    <p><a href="{% url 'email_verification_instructions' %}">{% trans "Click here if you need to see the instructions again." %}</a></p>
+{% endblock %}
