@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Student Portal{% endblock %}
+
+{% block content %}
+<h1>Welcome to the Student Portal</h1>
+
+<p>This portal allows you to register for workshops and access lab equipment.</p>
+
+{% if open_workshops %}
+    <h2>Currently Open Workshops:</h2>
+    <ul>
+    {% for workshop in open_workshops %}
+        <li>{{ workshop.name }} - Opens on: {{ workshop.opening_date }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>There are currently no open workshops. Please check back later.</p>
+{% endif %}
+
+<h2>New Students</h2>
+<p>If you're new here, please <a href="{% url 'register' %}">register for an account</a> to get started.</p>
+
+<h2>Returning Students</h2>
+<p>If you already have an account, please <a href="{% url 'account_login' %}">log in</a> to access your dashboard.</p>
+{% endblock %}

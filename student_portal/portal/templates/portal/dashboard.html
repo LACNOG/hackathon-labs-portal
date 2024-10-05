@@ -1,0 +1,12 @@
+{% extends 'portal/base.html' %}
+
+{% block content %}
+<h1>Welcome, {{ user.username }}</h1>
+{% if error %}
+    <p>{{ error }}</p>
+{% else %}
+    <p>Student ID: {{ student_id }}</p>
+    <p>Lab Group: {{ lab_group }}</p>
+    <p>Lab Password: {{ lab_password }}</p>
+{% endif %}
+{% endblock %}

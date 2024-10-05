@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Welcome, {{ user.first_name }}!</h2>
+<p>Your student ID: {{ user.studentprofile.student_id }}</p>
+<p>Your workshop: {{ user.studentprofile.workshop.name }}</p>
+<p>Your lab equipment: {{ user.studentprofile.lab_equipment.name }}</p>
+<p>Lab equipment password: {{ user.studentprofile.lab_equipment.password }}</p>
+{% endblock %}
