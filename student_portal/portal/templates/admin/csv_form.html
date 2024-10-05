@@ -1,0 +1,23 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block content %}
+    <h1>Import Lab Equipment from CSV for {{ workshop.name }}</h1>
+    <div style="margin-bottom: 20px;">
+        <h2>Instructions:</h2>
+        <ol>
+            <li>Prepare your CSV file with two columns: 'name' and 'password'.</li>
+            <li>Include a header row in your CSV file with these column names.</li>
+            <li>Each subsequent row should contain the equipment name and its corresponding password.</li>
+            <li>Select your CSV file using the form below.</li>
+            <li>Click "Upload CSV" to import the lab equipment.</li>
+        </ol>
+    </div>
+    <form action="{% url 'admin:workshop_import_csv' workshop.id %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Upload CSV">
+    </form>
+    <br>
+    <a href="{% url 'admin:portal_workshop_change' workshop.id %}" class="button">Return to Workshop</a>
+{% endblock %}
