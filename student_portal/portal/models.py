@@ -64,3 +64,23 @@ class StudentProfile(models.Model):
     def clean(self):
         if self.state not in [choice[0] for choice in self.State.choices]:
             raise ValidationError({'state': 'Invalid state value'})
+        
+class Notification(models.Model):
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification: {self.subject}"
+
+class NotificationRecipient(models.Model):
+    notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name='recipients')
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='received_notifications')
+    sent_at = models.DateTimeField(null=True, blank=True)
+    is_sent = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('notification', 'student')
+
+    def __str__(self):
+        return f"{self.notification.subject} - {self.student.user.username}"
