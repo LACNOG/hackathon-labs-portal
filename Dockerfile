@@ -11,6 +11,8 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    inetutils-ping \
+    net-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the current directory contents into the container at /app
