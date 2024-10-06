@@ -65,7 +65,21 @@
 
 {% block after_related_objects %}{% endblock %}
 
-{% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+{% block submit_buttons_bottom %}
+{% submit_row %}
+<div class="submit-row">
+    <input type="submit" value="{% trans 'Preview' %}" name="_preview" />
+</div>
+{% endblock %}
+
+{% if preview %}
+<fieldset class="module aligned">
+    <h2>{% trans "Message Preview" %}</h2>
+    <div class="form-row">
+        <pre>{{ preview }}</pre>
+    </div>
+</fieldset>
+{% endif %}
 
 {% block admin_change_form_document_ready %}
     <script type="text/javascript"
@@ -74,6 +88,23 @@
             {% if adminform and add %}
                 data-model-name="{{ opts.model_name }}"
             {% endif %}>
+    </script>
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+                var previewForSelect = $('#id_preview_for');
+                var form = $('#{{ opts.model_name }}_form');
+                
+                previewForSelect.on('change', function() {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: '_preview',
+                        value: 'true'
+                    }).appendTo(form);
+                    form.submit();
+                });
+            });
+        })(django.jQuery);
     </script>
 {% endblock %}
 

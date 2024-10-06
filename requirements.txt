@@ -5,3 +5,4 @@ django-allauth
 requests
 jwt
 django-extensions
+jinja2

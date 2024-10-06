@@ -14,6 +14,8 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.admin.utils import unquote
+from django.db import IntegrityError
+
 
 class CSVImportForm(forms.Form):
     csv_file = forms.FileField()
@@ -34,6 +36,11 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
+
+@admin.register(NotificationRecipient)
+class NotificationRecipientAdmin(admin.ModelAdmin):
+    search_fields = ['notification__subject', 'student__student_id']
+    list_display = ('notification', 'student', 'sent_at')
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
@@ -83,19 +90,41 @@ class NotificationForm(forms.ModelForm):
         queryset=StudentProfile.objects.all(),
         widget=admin.widgets.FilteredSelectMultiple('Recipients', False),
         required=False
+    )    
+    preview_for = forms.ModelChoiceField(
+        queryset=StudentProfile.objects.all(),
+        required=False,
+        help_text="Select a student to preview the rendered message"
     )
 
     class Meta:
         model = Notification
-        fields = ['subject', 'message']
+        fields = ['subject', 'template']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        template = cleaned_data.get('template')
+        preview_for = cleaned_data.get('preview_for')
+
+        if template and preview_for:
+            try:
+                context = {
+                    'user': preview_for.user,
+                    'student_profile': preview_for,
+                    'lab_equipment': preview_for.lab_equipment
+                }
+                Notification(template=template).render_message(context)
+            except Exception as e:
+                raise forms.ValidationError(f"Template error: {str(e)}")
+
+        return cleaned_data
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     form = NotificationForm
     list_display = ('subject', 'created_at', 'recipient_count', 'sent_count')
     list_filter = ('created_at',)
-    search_fields = ('subject', 'message')
-    date_hierarchy = 'created_at'
+    search_fields = ('subject', 'template')
     actions = ['send_notification']
 
     def get_urls(self):
@@ -112,7 +141,7 @@ class NotificationAdmin(admin.ModelAdmin):
     def change_notification(self, request, object_id):
         return self._changeform_view(request, object_id, '')
 
-    def _changeform_view(self, request, object_id, form_url, extra_context=None):
+    def _changeform_view(self, request, object_id, form_url):
         add = object_id is None
         if add:
             obj = None
@@ -124,21 +153,37 @@ class NotificationAdmin(admin.ModelAdmin):
             if form.is_valid():
                 notification = form.save()
                 recipients = form.cleaned_data['recipients']
-                NotificationRecipient.objects.filter(notification=notification).exclude(student__in=recipients).delete()
                 for recipient in recipients:
-                    NotificationRecipient.objects.get_or_create(notification=notification, student=recipient)
-                msg = _('The notification was added successfully.') if add else _('The notification was changed successfully.')
-                self.message_user(request, msg, messages.SUCCESS)
-                return self.response_post_save_change(request, notification)
+                    try:
+                        NotificationRecipient.objects.create(notification=notification, student=recipient)
+                    except IntegrityError:
+                        pass
+                self.message_user(request, 'Notification created successfully.')
+                # return redirect('admin:portal_notification_changelist')                
+                if '_preview' in request.POST:
+                    preview_for = form.cleaned_data['preview_for']
+                    if preview_for:
+                        context = {
+                            'user': preview_for.user,
+                            'student_profile': preview_for,
+                            'lab_equipment': preview_for.lab_equipment
+                        }
+                        preview = notification.render_message(context)
+                        messages.info(request, _("Preview generated. Please review below."))
+                        return self.response_change(request, notification, preview=preview)
+                else:
+                    msg = _('The notification was added successfully.') if add else _('The notification was changed successfully.')
+                    self.message_user(request, msg, messages.SUCCESS)
+                    return self.response_post_save_change(request, notification)
+                
         else:
             form = self.get_form(request, obj)(instance=obj)
             if obj:
-                form.initial['recipients'] = StudentProfile.objects.filter(received_notifications__notification=obj)
+                form.initial['preview_for'] = StudentProfile.objects.first()
 
-        fieldsets = self.get_fieldsets(request, obj)
         adminForm = admin.helpers.AdminForm(
             form,
-            list(fieldsets),
+            list(self.get_fieldsets(request, obj)),
             self.get_prepopulated_fields(request, obj),
             self.get_readonly_fields(request, obj),
             model_admin=self)
@@ -158,9 +203,31 @@ class NotificationAdmin(admin.ModelAdmin):
             'preserved_filters': self.get_preserved_filters(request),
         }
 
-        context.update(extra_context or {})
-
         return self.render_change_form(request, context, add=add, change=not add, obj=obj, form_url=form_url)
+
+    def response_change(self, request, obj, preview=None):
+        if preview:
+            opts = self.model._meta
+            context = {
+                **self.admin_site.each_context(request),
+                'title': _('Preview Notification'),
+                'object_id': obj.pk,
+                'original': obj,
+                'is_popup': False,
+                'to_field': None,
+                'media': self.media,
+                'preserved_filters': self.get_preserved_filters(request),
+                'preview': preview,
+                'opts': opts,
+                'app_label': opts.app_label,
+            }
+            return render(request, 'admin/portal/notification/preview.html', context)
+        return super().response_change(request, obj)
+    
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        form.base_fields['preview_for'].queryset = StudentProfile.objects.all()
+        return form
 
     def recipient_count(self, obj):
         return obj.recipients.count()
@@ -176,9 +243,15 @@ class NotificationAdmin(admin.ModelAdmin):
             sent_count = 0
             for recipient in recipients:
                 try:
+                    context = {
+                        'user': recipient.student.user,
+                        'student_profile': recipient.student,
+                        'lab_equipment': recipient.student.lab_equipment
+                    }
+                    message = notification.render_message(context)
                     send_mail(
                         subject=notification.subject,
-                        message=notification.message,
+                        message=message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[recipient.student.user.email],
                         fail_silently=False,
@@ -196,30 +269,3 @@ class NotificationAdmin(admin.ModelAdmin):
                 self.message_user(request, f"No new recipients for notification '{notification.subject}'.", level=messages.WARNING)
 
     send_notification.short_description = "Send selected notifications"
-    
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        form.base_fields['recipients'].queryset = StudentProfile.objects.all()
-        return form
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if not change:  # Only for new notifications
-            recipients = form.cleaned_data.get('recipients')
-            if recipients:
-                for recipient in recipients:
-                    NotificationRecipient.objects.create(notification=obj, student=recipient)
-
-    def save_related(self, request, form, formsets, change):
-        super().save_related(request, form, formsets, change)
-        recipients = form.cleaned_data.get('recipients')
-        if recipients is not None:
-            current_recipients = set(NotificationRecipient.objects.filter(notification=form.instance).values_list('student_id', flat=True))
-            new_recipients = set(recipients.values_list('id', flat=True))
-            
-            # Remove recipients that are no longer selected
-            NotificationRecipient.objects.filter(notification=form.instance, student_id__in=current_recipients - new_recipients).delete()
-            
-            # Add new recipients
-            for recipient_id in new_recipients - current_recipients:
-                NotificationRecipient.objects.create(notification=form.instance, student_id=recipient_id)
