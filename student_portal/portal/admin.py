@@ -21,6 +21,8 @@ class StudentProfileInline(admin.StackedInline):
     model = StudentProfile
     can_delete = False
     verbose_name_plural = 'Student Profile'
+    # Remove readonly_fields for state to make it editable
+    fields = ('student_id', 'lab_equipment', 'state')
 
 class UserAdmin(BaseUserAdmin):
     inlines = (StudentProfileInline,)
@@ -30,9 +32,11 @@ admin.site.register(User, UserAdmin)
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'student_id', 'lab_equipment', 'workshop')
+    list_display = ('user', 'student_id', 'lab_equipment', 'workshop', 'state')
     search_fields = ('user__username', 'student_id', 'lab_equipment__name')
-    list_filter = ('lab_equipment__workshop',)
+    list_filter = ('lab_equipment__workshop', 'state')
+    # Remove readonly_fields for state to make it editable
+    fields = ('user', 'student_id', 'lab_equipment', 'state')
 
     def workshop(self, obj):
         return obj.workshop

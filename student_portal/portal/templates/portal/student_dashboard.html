@@ -1,11 +1,21 @@
 {% extends "base.html" %}
-
 {% block title %}Student Dashboard{% endblock %}
-
 {% block content %}
 <h1>Welcome, {{ user.first_name }}!</h1>
-<p>Your student ID: {{ user.studentprofile.student_id }}</p>
-<p>Your workshop: {{ user.studentprofile.workshop.name }}</p>
-<p>Your lab equipment: {{ user.studentprofile.lab_equipment.name }}</p>
-<p>Lab equipment password: {{ user.studentprofile.lab_equipment.password }}</p>
+
+<p>Your student ID: {{ student_profile.student_id }}</p>
+<p>Your Request State: {{ student_profile.get_state_display }}</p>
+
+{% if show_lab_info %}
+    <p>Your workshop: {{ student_profile.workshop.name }}</p>
+    <p>Your lab equipment: {{ student_profile.lab_equipment.name }}</p>
+    <p>Lab equipment password: {{ student_profile.lab_equipment.password }}</p>
+{% else %}
+    {% if student_profile.state == 'Pending' %}
+        <p>Your application is still pending. Lab equipment information will be available once your application is assigned.</p>
+    {% elif student_profile.state == 'Rejected' %}
+        <p>We're sorry, but your application has been rejected. If you believe this is an error, please contact the administrator.</p>
+    {% endif %}
+{% endif %}
+
 {% endblock %}
