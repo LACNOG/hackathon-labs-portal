@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-vx3q%qmsp_i#ht-qu#ve9fk_^$c*%#01runlb9uzj_jfp^8z9^
 DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'lab-portal.labs.lacnic.net', 'ballena.labs.lacnic.net']
-CSRF_TRUSTED_ORIGINS=['http://ballena.labs.lacnic.net:8000', 'http://localhost:8000']
+CSRF_TRUSTED_ORIGINS=['http://ballena.labs.lacnic.net:8000', 'http://localhost:8000', 'https://lab-portal.labs.lacnic.net']
 INTERNAL_IPS = ['127.0.0.1', ]
 
 
