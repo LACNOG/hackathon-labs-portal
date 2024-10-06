@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-vx3q%qmsp_i#ht-qu#ve9fk_^$c*%#01runlb9uzj_jfp^8z9^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1', 'lab-portal.labs.lacnic.net']
 INTERNAL_IPS = ['127.0.0.1', ]
 
 
