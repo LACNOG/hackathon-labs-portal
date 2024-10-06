@@ -10,6 +10,8 @@ services:
       - db
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/student_portal
+    networks:
+      - nginx_proxy_manager
 
   db:
     image: postgres:13
@@ -19,6 +21,13 @@ services:
       - POSTGRES_DB=student_portal
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    networks:
+      - nginx_proxy_manager
 
 # volumes:
 #  postgres_data:
+#
+networks:
+  nginx_proxy_manager:
+    name: nginx_proxy_manager_default
+    external: true
