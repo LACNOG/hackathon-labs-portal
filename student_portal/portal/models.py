@@ -4,6 +4,7 @@ from django.utils import timezone
 import csv
 from io import StringIO
 from django.core.exceptions import ValidationError
+from jinja2 import Template
 
 class Workshop(models.Model):
     name: models.CharField = models.CharField(max_length=100)
@@ -67,15 +68,22 @@ class StudentProfile(models.Model):
         
 class Notification(models.Model):
     subject = models.CharField(max_length=255)
-    message = models.TextField()
+    template = models.TextField(
+        help_text="Jinja2 template for the notification message",
+        default="Hello {{ user.first_name }},\n\nThis is a default notification template."
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Notification: {self.subject}"
+        return self.subject
 
+    def render_message(self, context):
+        template = Template(self.template)
+        return template.render(context)
+    
 class NotificationRecipient(models.Model):
     notification = models.ForeignKey(Notification, on_delete=models.CASCADE, related_name='recipients')
-    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='received_notifications')
+    student = models.ForeignKey('StudentProfile', on_delete=models.CASCADE, related_name='received_notifications')
     sent_at = models.DateTimeField(null=True, blank=True)
     is_sent = models.BooleanField(default=False)
 
