@@ -11,11 +11,9 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
-    inetutils-ping \
-    net-tools \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the current directory contents into the container at /app
+# Copy the requirements file into the container
 COPY requirements.txt /app/
 
 # Install any needed packages specified in requirements.txt
@@ -24,12 +22,14 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Install Gunicorn
 RUN pip install gunicorn
 
-# Copy the current directory contents into the container at /app
-COPY . /app/
+# Copy the student_portal directory contents into the container at /app
+COPY student_portal /app/
+
+# Create directories for static and media files
+RUN mkdir -p /app/staticfiles /app/media
 
 # Collect static files
-WORKDIR /app/student_portal
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput --clear
 
 # Run Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "student_portal.wsgi:application"]
