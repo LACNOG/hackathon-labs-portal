@@ -1,7 +1,7 @@
 services:
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    # command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
     ports:
@@ -26,7 +26,6 @@ services:
 
 # volumes:
 #  postgres_data:
-#
 networks:
   nginx_proxy_manager:
     name: nginx_proxy_manager_default
