@@ -34,10 +34,34 @@ class CustomLoginView(LoginView):
     #     context['page_title'] = 'Log In'  # Add any additional context you need
     #     return context
 
-
 class CustomConfirmEmailView(ConfirmEmailView):
-     # template_name = 'account/email_confirmation.html'
-     template_name = 'account/email_confirmation.html'
+    template_name = 'account/email_confirmation.html'
+
+    def get_object(self, *args, **kwargs):
+        key = kwargs.get('key')
+        emailconfirmation = EmailConfirmationHMAC.from_key(key)
+        if not emailconfirmation:
+            if EmailConfirmation.objects.all_valid().filter(key=key).exists():
+                emailconfirmation = EmailConfirmation.objects.all_valid().get(key=key)
+                emailconfirmation.confirm(self.request)
+            else:
+                emailconfirmation = None
+        return emailconfirmation
+
+    def get(self, *args, **kwargs):
+        self.object = self.get_object(**kwargs)
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['confirmation'] = self.object
+        return context
+
+
+# class CustomConfirmEmailView(ConfirmEmailView):
+#      # template_name = 'account/email_confirmation.html'
+#      template_name = 'account/email_confirmation.html'
 
 
 class StudentSignupView(SignupView):
@@ -47,7 +71,12 @@ class StudentSignupView(SignupView):
 student_signup = StudentSignupView.as_view()
 
 def student_dashboard(request):
-    return render(request, "portal/student_dashboard.html")
+    student_profile = StudentProfile.objects.get(user=request.user)
+    context = {
+        'student_profile': student_profile,
+        'show_lab_info': student_profile.state == StudentProfile.State.ASSIGNED,
+    }
+    return render(request, "portal/student_dashboard.html", context)
 
 def landing_page(request):
     open_workshops = Workshop.objects.filter(is_open=True)
