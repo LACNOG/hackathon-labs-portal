@@ -71,7 +71,15 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'mail.lacnic.net.uy'
+EMAIL_PORT = 25
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'authusr'
+EMAIL_HOST_PASSWORD = 'rew4ud3wum'
+DEFAULT_FROM_EMAIL = 'hdns-lacnic42-noreply@lacnic.net'
 
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
