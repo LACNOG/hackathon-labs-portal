@@ -19,6 +19,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 
+admin.site.site_header = "LACNOG Labs Portal"
+admin.site.site_title = "LACNOG Labs Portal"
+admin.site.index_title = "Welcome LACNOG's Lab Portal Admin Interface"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('accounts/', include('allauth.urls')),
