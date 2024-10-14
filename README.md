@@ -120,12 +120,12 @@ Las contribuciones son bienvenidas. Por favor, abre un issue para discutir cambi
 - **Versión 1 (actual)**: MVP funcional utilizado exitosamente en talleres recientes.
 
 ## Contacto
-Para más información o soporte, por favor contacta a [tu-email@ejemplo.com].
+Para más información o soporte, por favor contacta a [cmartinez AT nog.lat].
 
 ## Licencia
 Este proyecto está licenciado bajo la Licencia BSD de 3 cláusulas. Consulta el archivo `LICENSE` en el repositorio para más detalles.
 
-Copyright (c) [Año], [Tu Nombre o Nombre de la Organización]
+Copyright (c) 2024, [Carlos Martinez, LACNOG]
 Todos los derechos reservados.
 
 [Texto completo de la licencia BSD 3-Clause]
