@@ -128,4 +128,3 @@ Este proyecto está licenciado bajo la Licencia BSD de 3 cláusulas. Consulta el
 Copyright (c) 2024, [Carlos Martinez, LACNOG]
 Todos los derechos reservados.
 
-[Texto completo de la licencia BSD 3-Clause]
