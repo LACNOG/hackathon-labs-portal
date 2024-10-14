@@ -6,7 +6,7 @@ El Portal de Estudiantes es una aplicación web desarrollada con Django que faci
 ## Características principales
 - Registro de estudiantes y autenticación de usuarios
 - Inscripción en talleres
-- Asignación automática de equipos de laboratorio
+- Interfaz para asignar equipos de laboratorio a participantes
 - Panel de administración para gestionar talleres y equipos
 - Verificación de correo electrónico para nuevos registros
 
