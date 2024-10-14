@@ -77,8 +77,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mail.lacnic.net.uy'
 EMAIL_PORT = 25
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'authusr'
-EMAIL_HOST_PASSWORD = 'rew4ud3wum'
+EMAIL_HOST_USER = 'XXXXX'
+EMAIL_HOST_PASSWORD = 'YYYYYY'
 DEFAULT_FROM_EMAIL = 'hdns-lacnic42-noreply@lacnic.net'
 
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
