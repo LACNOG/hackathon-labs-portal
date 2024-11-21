@@ -16,6 +16,10 @@ from django.http import HttpResponseRedirect
 from allauth.account.views import LoginView, LogoutView # type: ignore
 from django.urls import reverse_lazy
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 class CustomLogoutView(LogoutView):
     template_name = 'account/logout2.html'  # Use logout2.html instead of logout.html
     success_url = reverse_lazy('landing_page')  # or whatever your home page URL name is
@@ -34,30 +38,67 @@ class CustomLoginView(LoginView):
     #     context['page_title'] = 'Log In'  # Add any additional context you need
     #     return context
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from allauth.account.views import ConfirmEmailView
+from allauth.account.models import EmailConfirmation, EmailConfirmationHMAC
+from django.http import HttpResponseBadRequest
+import logging
+
+logger = logging.getLogger(__name__)
+
 class CustomConfirmEmailView(ConfirmEmailView):
     template_name = 'account/email_confirmation.html'
 
-    def get_object(self, *args, **kwargs):
+    def get_object(self, *args, **kwargs) -> EmailConfirmation | None:
         key = kwargs.get('key')
-        emailconfirmation = EmailConfirmationHMAC.from_key(key)
-        if not emailconfirmation:
-            if EmailConfirmation.objects.all_valid().filter(key=key).exists():
-                emailconfirmation = EmailConfirmation.objects.all_valid().get(key=key)
-                emailconfirmation.confirm(self.request)
-            else:
-                emailconfirmation = None
-        return emailconfirmation
+        if not key:
+            return None
+
+        try:
+            emailconfirmation = EmailConfirmationHMAC.from_key(key)
+            if emailconfirmation:
+                return emailconfirmation
+        except Exception as e:
+            logger.error(f"Error in HMAC confirmation: {str(e)}")
+
+        try:
+            queryset = EmailConfirmation.objects.all_valid()
+            emailconfirmation = queryset.get(key=key)
+            return emailconfirmation
+        except EmailConfirmation.DoesNotExist:
+            logger.warning(f"No valid confirmation found for key: {key}")
+            return None
+        except Exception as e:
+            logger.error(f"Unexpected error in email confirmation: {str(e)}")
+            return None
 
     def get(self, *args, **kwargs):
         self.object = self.get_object(**kwargs)
+        if self.object is None:
+            return HttpResponseBadRequest("Invalid or expired confirmation link.")
         context = self.get_context_data()
         return self.render_to_response(context)
+
+    def post(self, *args, **kwargs):
+        self.object = self.get_object(**kwargs)
+        if self.object is None:
+            return HttpResponseBadRequest("Invalid or expired confirmation link.")
+        
+        try:
+            self.object.confirm(self.request)
+        except Exception as e:
+            logger.error(f"Error confirming email: {str(e)}")
+            messages.error(self.request, "An error occurred while confirming your email. Please try again.")
+            return redirect('account_email')
+
+        messages.success(self.request, "Your email has been confirmed.")
+        return redirect('account_email')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['confirmation'] = self.object
         return context
-
 
 # class CustomConfirmEmailView(ConfirmEmailView):
 #      # template_name = 'account/email_confirmation.html'
